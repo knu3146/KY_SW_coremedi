@@ -1,37 +1,188 @@
-# CoreMediApp
+<div align="center">
 
-CoreMediApp은 첨부된 `coremedi.csv`를 `assets`에 포함하여 증상 기반 상비약 정보를 추천하는 Android Studio용 Kotlin 예제 프로젝트입니다.
+<img src="screenshots/logo.png" width="100" alt="CoreMedi Logo"/>
 
-## 주요 기능
+# CoreMedi
+### 증상 기반 맞춤 상비약 추천 안드로이드 앱
 
-| 기능 | 구현 내용 |
-|---|---|
-| 회원가입 | Room DB에 사용자 계정 저장 |
-| 로그인 | 아이디와 비밀번호 검증 후 세션 저장 |
-| 로그아웃 | SharedPreferences 세션 삭제 |
-| 알레르기 반응 입력 | 사용자별 알레르기·피해야 할 키워드 저장 |
-| 부작용 입력 | 사용자별 피하고 싶은 부작용 키워드 저장 |
-| 증상 입력 | 증상 키워드를 기반으로 CSV 효능 문구 검색 |
-| 상비약 추천 | 효능 매칭 점수 계산 후 주의사항·부작용 충돌 항목 제외 |
+[![Android](https://img.shields.io/badge/Platform-Android-green?logo=android)](https://developer.android.com)
+[![Kotlin](https://img.shields.io/badge/Language-Kotlin%202.0.21-7F52FF?logo=kotlin)](https://kotlinlang.org)
+[![API](https://img.shields.io/badge/Min%20SDK-API%2024-blue)](https://developer.android.com/about/versions/nougat)
+[![License](https://img.shields.io/badge/License-MIT-orange)](LICENSE)
 
-## Android Studio 실행 방법
+</div>
 
-1. Android Studio에서 `Open`을 선택한 뒤 이 폴더를 엽니다.
-2. Gradle 동기화가 끝날 때까지 기다립니다.
-3. 에뮬레이터 또는 실제 기기를 선택한 후 실행합니다.
-4. 처음 실행하면 회원가입을 한 뒤 로그인합니다.
-5. 증상, 알레르기 반응, 부작용 경험을 입력하고 `상비약 추천받기`를 누릅니다.
+---
 
-## 데이터
+## 📱 스크린샷
 
-원본 CSV는 다음 경로에 포함되어 있습니다.
+<div align="center">
 
-```text
-app/src/main/assets/coremedi.csv
+| 로그인 | 회원가입 | 메인 화면 | 사이드 메뉴 |
+|:---:|:---:|:---:|:---:|
+| <img src="screenshots/01_login.png" width="180"/> | <img src="screenshots/02_register.png" width="180"/> | <img src="screenshots/04_main.png" width="180"/> | <img src="screenshots/03_menu.png" width="180"/> |
+
+| 약 정보 검색 | 약 상세 정보 | 부작용 분석 | 약 카테고리 |
+|:---:|:---:|:---:|:---:|
+| <img src="screenshots/05_search.png" width="180"/> | <img src="screenshots/06_detail.png" width="180"/> | <img src="screenshots/08_sideeffect_result.png" width="180"/> | <img src="screenshots/09_category.png" width="180"/> |
+
+</div>
+
+---
+
+## ✨ 주요 기능
+
+- 🔍 **증상 기반 추천** — 증상 키워드를 입력하면 관련 상비약을 관련도 순으로 최대 30개 추천
+- 💊 **약 정보 검색** — 약품명 또는 성분명으로 직접 검색, 효능·복용법·부작용 전체 정보 제공
+- ⚠️ **부작용 심층 분석** — 약품의 부작용을 소화기계·신경계 등 기관계별로 분류하여 표시
+- 📂 **카테고리별 탐색** — 진통해열제, 소화제 등 13개 카테고리로 약품 전체 탐색
+- 🚫 **알레르기 안전 필터** — 사용자 알레르기·부작용 이력 등록 시 해당 성분 약품 자동 제외
+- 📴 **완전한 오프라인 동작** — 서버·인터넷 연결 없이 앱 내장 데이터만으로 모든 기능 사용 가능
+
+---
+
+## 🛠 기술 스택
+
+| 분류 | 기술 |
+|------|------|
+| 언어 | Kotlin 2.0.21 |
+| UI | Material Components 1.12.0, View Binding |
+| 비동기 | Kotlin Coroutines 1.7.3 |
+| 로컬 DB | Room Database 2.6.1 (SQLite) |
+| 리스트 | RecyclerView + ListAdapter + DiffUtil |
+| 보안 | SHA-256 + Salt (비밀번호 해시) |
+| 세션 | SharedPreferences |
+| 빌드 | Gradle KTS, AGP 8.7.3, KAPT |
+| 데이터 | 식약처 공공 데이터 CSV (약 11,000건) |
+
+---
+
+## 🏗 아키텍처
+
+3-계층(Layered) 구조를 채택하였습니다.
+
+```
+com.example.coremedi/
+├── ui/            # Presentation Layer — Activity 4종, MedicineAdapter
+│   ├── LoginActivity.kt
+│   ├── RegisterActivity.kt
+│   ├── MainActivity.kt
+│   └── MedicineDetailActivity.kt
+├── repository/    # Business Logic Layer
+│   ├── MedicineRepository.kt   # CSV 파싱 + 추천 알고리즘
+│   └── AuthRepository.kt       # 사용자 인증
+├── data/          # Data Layer — Room DB
+│   ├── AppDatabase.kt
+│   ├── UserDao.kt
+│   └── UserEntity.kt
+├── model/
+│   └── Medicine.kt             # Parcelable 데이터 모델
+├── util/
+│   ├── PasswordUtil.kt         # SHA-256 + Salt
+│   └── SessionManager.kt       # SharedPreferences 세션
+└── adapter/
+    └── MedicineAdapter.kt
 ```
 
-앱은 실행 중 이 파일을 직접 파싱합니다. CSV는 총 4,736개 의약품 데이터를 포함합니다.
+### 추천 알고리즘 스코어링
 
-## 학습용 주의사항
+| 매칭 필드 | 가중치 |
+|-----------|--------|
+| 효능·효과 (efcyQesitm) | +10 |
+| 약품명 (itemName) | +4 |
+| 복용 방법 (useMethodQesitm) | +1 |
 
-이 프로젝트는 학습용 예제입니다. 추천 결과는 실제 진단이나 처방이 아니며, 실제 의약품 복용 전에는 반드시 의사 또는 약사와 상담해야 합니다.
+score > 0인 약품만 결과에 포함하며, 알레르기 필터링 후 내림차순 상위 30개 반환
+
+---
+
+## ⚙️ 개발 환경
+
+| 항목 | 버전 |
+|------|------|
+| IDE | Android Studio Ladybug 이상 |
+| JDK | 17 |
+| AGP | 8.7.3 |
+| compileSdk | 35 |
+| minSdk | 24 |
+| targetSdk | 35 |
+
+---
+
+## 🚀 빌드 및 실행
+
+### 사전 요구사항
+- Android Studio Ladybug 이상
+- JDK 17
+- Android 7.0+ 기기 또는 에뮬레이터 (API 24+)
+
+### 실행 방법
+
+```bash
+# 1. 저장소 클론
+git clone https://github.com/knu3146/KY_SW_coremedi.git
+
+# 2. Android Studio에서 프로젝트 열기
+#    File > Open > CoreMediApp 폴더 선택
+
+# 3. Gradle 동기화 완료 후 실행
+#    Run > Run 'app' (Shift+F10)
+```
+
+### Run Configuration 확인
+`Run > Edit Configurations > app` 에서 **Module**이 `CoreMediApp.app` 으로 설정되어 있는지 확인하세요.
+
+---
+
+## 📂 프로젝트 구조
+
+```
+CoreMediApp/
+├── app/
+│   ├── src/main/
+│   │   ├── assets/
+│   │   │   └── coremedi.csv          # 약품 데이터 (식약처 공공 데이터)
+│   │   ├── java/com/example/coremedi/
+│   │   └── res/
+│   │       ├── layout/               # Activity XML 4종
+│   │       └── values/
+│   │           ├── colors.xml
+│   │           └── themes.xml
+│   └── build.gradle.kts
+├── gradle.properties                 # android.useAndroidX=true
+└── README.md
+```
+
+---
+
+## 🗄 데이터베이스 스키마
+
+### users 테이블 (Room Database)
+
+| 컬럼 | 타입 | 설명 |
+|------|------|------|
+| id | INTEGER PK | 자동 증가 |
+| email | TEXT UNIQUE | 로그인 아이디 |
+| passwordHash | TEXT | SHA-256 해시 |
+| salt | TEXT | 비밀번호 해싱용 Salt |
+| allergyInfo | TEXT | 알레르기 정보 (자유 텍스트) |
+| sideEffectInfo | TEXT | 부작용 이력 (자유 텍스트) |
+
+---
+
+## ⚠️ 면책 조항
+
+본 앱은 **일반의약품(OTC) 정보 제공**을 목적으로 하며, **의학적 진단 또는 처방을 대체하지 않습니다.**
+심각한 증상이 있는 경우 반드시 의사 또는 약사에게 상담하시기 바랍니다.
+
+---
+
+## 👥 팀 정보
+
+창의설계 2조
+
+---
+
+<div align="center">
+  <sub>© 2025 CoreMedi. Built with ❤️ using Kotlin & Android</sub>
+</div>
